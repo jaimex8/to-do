@@ -3,10 +3,29 @@ import Form from "./components/Form";
 import FilterButton from "./components/FilterButton";
 import Todo from './components/Todo.jsx';
 import './App.css'
+import { nanoid } from "nanoid";
 
 function App(props) {
 
-  const [tasks, setTasks] = useState(props.tasks);
+  const [tasks, setTasks] = useState(props.tasks);  
+
+  function toggleTaskCompleted(id) {
+    const updatedTasks = tasks.map((task) => {
+      // if this task has the same ID as the edited task
+      if (id === task.id) {
+        // use object spread to make a new object
+        // whose `completed` prop has been inverted
+        return { task, completed: !task.completed };
+      }
+      return task;
+    });
+    setTasks(updatedTasks);
+  }
+
+  function deleteTask(id) {
+    const remainingTasks = tasks.filter((task) => id !== task.id);
+    setTasks(remainingTasks);
+  }
 
   const taskList = tasks?.map((task) => (
     <Todo 
@@ -14,12 +33,30 @@ function App(props) {
     name={task.name} 
     completed={task.completed}
     key={task.id} 
+    toggleTaskCompleted={toggleTaskCompleted}
+    deleteTask={deleteTask}
+    editTask={editTask}
     />
   ));
 
+  const headingText = `${taskList.length} tasks remaining`;
+
   function addTask(name) {
-    const newTask = { id: "id", name, completed: false };
+    const newTask = { id: `todo-${nanoid()}`, name, completed: false };
     setTasks([tasks, newTask]);
+  }
+
+  function editTask(id, newName) {
+    const editedTaskList = tasks.map((task) => {
+      // if this task has the same ID as the edited task
+      if (id === task.id) {
+        // Copy the task and update its name
+        return { ...task, name: newName };
+      }
+      // Return the original task if it's not the edited task
+      return task;
+    });
+    setTasks(editedTaskList);
   }
 
 
@@ -33,7 +70,7 @@ function App(props) {
           <FilterButton />
           <FilterButton />
         </div>
-        <h2 id="list-heading">3 tasks remaining</h2>
+        <h2 id="list-heading">{headingText}</h2>
         <ul
           role="list"
           className="todo-list stack-large stack-exception"
