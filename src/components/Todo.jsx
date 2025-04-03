@@ -17,8 +17,6 @@ function ToDo(props) {
   const editButtonRef = useRef(null);
 
   const wasEditing = usePrevious(isEditing);
-  console.log(wasEditing);
-
 
   function handleChange(e) {
     setNewName(e.target.value);
@@ -99,9 +97,6 @@ function ToDo(props) {
     }
   }, [wasEditing, isEditing]);
 
-
-
-  console.log("main render");
 
   return <li className="todo">{isEditing ? editingTemplate : viewTemplate}</li>;
 
