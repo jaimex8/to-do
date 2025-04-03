@@ -18,21 +18,13 @@ const FILTER_MAP = {
   Active: (task) => !task.completed,
   Completed: (task) => task.completed,
 };
+
 const FILTER_NAMES = Object.keys(FILTER_MAP);
 
 function App(props) {
 
   const [tasks, setTasks] = useState(props.tasks); 
-
-  const listHeadingRef = useRef(null);
-
-  const prevTaskLength = usePrevious(tasks.length);
-
-  useEffect(() => {
-    if (tasks.length < prevTaskLength) {
-      listHeadingRef.current.focus();
-    }
-  }, [tasks.length, prevTaskLength]); 
+  const [filter, setFilter] = useState("All");
 
   function toggleTaskCompleted(id) {
     const updatedTasks = tasks.map((task) => {
@@ -52,7 +44,18 @@ function App(props) {
     setTasks(remainingTasks);
   }
 
-  const [filter, setFilter] = useState("All");
+  function editTask(id, newName) {
+    const editedTaskList = tasks.map((task) => {
+      // if this task has the same ID as the edited task
+      if (id === task.id) {
+        // Copy the task and update its name
+        return { ...task, name: newName };
+      }
+      // Return the original task if it's not the edited task
+      return task;
+    });
+    setTasks(editedTaskList);
+  }
 
   const taskList = tasks
     .filter(FILTER_MAP[filter])
@@ -77,25 +80,22 @@ function App(props) {
     />
   ));
 
-  const headingText = `${taskList.length} tasks remaining`;
-
   function addTask(name) {
-    const newTask = { id: `todo-${nanoid()}`, name, completed: false };
-    setTasks([tasks, newTask]);
+    const newTask = { id: `todo-${nanoid()}`, name: name, completed: false };
+    setTasks([...tasks, newTask]);
   }
 
-  function editTask(id, newName) {
-    const editedTaskList = tasks.map((task) => {
-      // if this task has the same ID as the edited task
-      if (id === task.id) {
-        // Copy the task and update its name
-        return { ...task, name: newName };
-      }
-      // Return the original task if it's not the edited task
-      return task;
-    });
-    setTasks(editedTaskList);
-  }  
+  const tasksNoun = taskList.length !== 1 ? "tasks" : "task";
+  const headingText = `${taskList.length} ${tasksNoun} remaining`;
+
+  const listHeadingRef = useRef(null);
+  const prevTaskLength = usePrevious(tasks.length);  
+
+  useEffect(() => {
+    if (tasks.length < prevTaskLength) {
+      listHeadingRef.current.focus();
+    }
+  }, [tasks.length, prevTaskLength]);
 
   return (
     <>      
